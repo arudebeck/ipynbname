@@ -56,14 +56,13 @@ def _get_sessions(srv):
         server.
     """
     try:
-        qry_str = ""
         token = srv['token']
         if not token and "JUPYTERHUB_API_TOKEN" in os.environ:
             token = os.environ["JUPYTERHUB_API_TOKEN"]
-        qry_str = f"?token={token}" if token else ""
-        url = f"{srv['url']}api/sessions{qry_str}"
+        token = f"token {token}" if token else ""
+        url = f"{srv['url']}api/sessions"
         # Use a timeout in case this is a stale entry.
-        with urllib.request.urlopen(url, timeout=0.5) as req:
+        with urllib.request.urlopen(urllib.request.Request(url, headers={'Authorization': token}), timeout=0.5) as req:
             return json.load(req)
     except Exception:
         raise urllib.error.HTTPError(CONN_ERROR)
